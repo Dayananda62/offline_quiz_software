@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fullscreen Quiz</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        /* Outer Space Theme */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            
+            color: #fff;
+            position: relative;
+            overflow: auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-top: 50px;
+            color: #fff;
+            text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .quiz-container {
+            width: 80%;
+            margin:150px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .question {
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .question p {
+            font-size: 1.4em;
+            text-shadow: 1px 1px 5px rgba(255, 255, 255, 0.3);
+        }
+
+        .quiz-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #quiz-form {
+            display: none;
+            flex-direction: column;
+        }
+
+        #login-form {
+            text-align: center;
+        }
+
+        #timer {
+            font-size: 1.8em;
+            color: #f00;
+            text-align: center;
+            text-shadow: 1px 1px 10px rgba(255, 0, 0, 0.6);
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            padding: 10px;
+            font-size: 1.2em;
+            border-radius: 8px;
+            border: 2px solid #444;
+            margin-bottom: 10px;
+            width: 70%;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        button {
+            background-color: #4e92fc;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #3b7bec;
+        }
+
+        /* Animating the Space Background */
+        @keyframes space-background {
+            0% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: 100% 100%;
+            }
+        }
+
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.publicdomainpictures.net/pictures/30000/velka/starry-night-sky-1461388464I5N.jpg') no-repeat center center fixed;
+            background-size: cover;
+            animation: space-background 60s linear infinite;
+            z-index: -1;
+            filter: blur(10px);
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://cdn.pixabay.com/photo/2017/08/30/03/16/space-2695562_960_720.jpg') repeat;
+            z-index: -1;
+            animation: move-stars 120s linear infinite;
+        }
+
+        @keyframes move-stars {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, -100%); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="login-form">
+        <h1>Enter Your Team Name and Password</h1>
+        <form onsubmit="event.preventDefault(); validateLogin();">
+            <div>
+                <label for="team-name">Team Name: </label>
+                <input type="text" id="team-name" required><br><br>
+            </div>
+            <div>
+                <label for="password">Password: </label>
+                <input type="password" id="password" required><br><br>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <!-- Quiz Form -->
+    <div class="quiz-container" id="quiz-form">
+        <h1>Welcome to the Quiz</h1>
+        <div id="timer">Time remaining: 20:00</div>
+        <form id="quiz-form-1">
+            <div class="question">
+                <p>1) What is the purpose of the viewport meta tag in responsive web design?</p>
+                <label><input type="radio" name="q1" value="A"> A) To set the background color</label><br>
+                <label><input type="radio" name="q1" value="B"> B) To control the layout on mobile browsers</label><br>
+                <label><input type="radio" name="q1" value="C"> C) To define the character set</label><br>
+                <label><input type="radio" name="q1" value="D"> D) To link external stylesheet</label><br>
+            </div>
+            
+            <div class="question">
+                <p>2) Which of the following is NOT a valid HTML5 element?</p>
+                <label><input type="radio" name="q2" value="A"> A) &lt;header&gt;</label><br>
+                <label><input type="radio" name="q2" value="B"> B) &lt;footer&gt;</label><br>
+                <label><input type="radio" name="q2" value="C"> C) &lt;section&gt;</label><br>
+                <label><input type="radio" name="q2" value="D"> D) &lt;font&gt;</label><br>
+            </div>
+            
+            <div class="question">
+                <p>3) Which of the following CSS properties is used to create a flexible layout that adapts to different screen sizes?</p>
+                <label><input type="radio" name="q3" value="A"> A) flex-grow</label><br>
+                <label><input type="radio" name="q3" value="B"> B) flex-basis</label><br>
+                <label><input type="radio" name="q3" value="C"> C) flex-shrink</label><br>
+                <label><input type="radio" name="q3" value="D"> D) display: flex</label><br>
+            </div>
+            
+            <div class="question">
+                <p>4) Which of the following methods can be used to optimize images for web performance?</p>
+                <label><input type="radio" name="q4" value="A"> A) Using SVG format</label><br>
+                <label><input type="radio" name="q4" value="B"> B) Lazy loading images</label><br>
+                <label><input type="radio" name="q4" value="C"> C) Compressing images</label><br>
+                <label><input type="radio" name="q4" value="D"> D) All of the above</label><br>
+            </div>
+            
+            <div class="question">
+                <p>5) What is the purpose of using the srcset attribute in the &lt;img&gt; tag?</p>
+                <label><input type="radio" name="q5" value="A"> A) To specify multiple image formats</label><br>
+                <label><input type="radio" name="q5" value="B"> B) To provide different image resolutions for responsive design</label><br>
+                <label><input type="radio" name="q5" value="C"> C) To define the size of the image</label><br>
+                <label><input type="radio" name="q5" value="D"> D) To specify the image's alternative text</label><br>
+            </div>
+            
+            <div class="question">
+                <p>6) In CSS Grid Layout, which property specifies the number of columns and rows in the grid?</p>
+                <label><input type="radio" name="q6" value="A"> A) grid-template-area</label><br>
+                <label><input type="radio" name="q6" value="B"> B) grid-template-columns and grid-template-rows</label><br>
+                <label><input type="radio" name="q6" value="C"> C) grid-template</label><br>
+                <label><input type="radio" name="q6" value="D"> D) grid-area</label><br>
+            </div>
+            
+            <div class="question">
+                <p>7) What is the effect of using the will-change property in CSS?</p>
+                <label><input type="radio" name="q7" value="A"> A) It improves the rendering performance by hinting the browser about expected changes</label><br>
+                <label><input type="radio" name="q7" value="B"> B) It sets a transition for an element</label><br>
+                <label><input type="radio" name="q7" value="C"> C) It allows an element to change its z-index dynamically</label><br>
+                <label><input type="radio" name="q7" value="D"> D) It prevents an element from being changed</label><br>
+            </div>
+            <div class="question">
+                <p>8. In JavaScript, what is the purpose of the debounce function?</p>
+                <label><input type="radio" name="q8" value="A"> A) To delay the execution of a function until after a certain period since the last time it was invoked</label><br>
+                <label><input type="radio" name="q8" value="B"> B) To ensure a function is executed only once</label><br>
+                <label><input type="radio" name="q8" value="C"> C) To execute a function at regular intervals</label><br>
+                <label><input type="radio" name="q8" value="D"> D) To optimize performance by reducing the number of times a function runs</label><br>
+            </div>
+            <div class="question">
+                <p>9. What is the purpose of the &lt;picture&gt; element in HTML?</p>
+                <label><input type="radio" name="q9" value="A"> A) To create an image gallery</label><br>
+                <label><input type="radio" name="q9" value="B"> B) To provide multiple sources for an image based on different conditions</label><br>
+                <label><input type="radio" name="q9" value="C"> C) To define the size of an image</label><br>
+                <label><input type="radio" name="q9" value="D"> D) To create a responsive image using CSS</label><br>
+            </div>
+            <div class="question">
+                <p>10. What is a CSS preprocessor, and why is it used?</p>
+                <label><input type="radio" name="q10" value="A"> A) A tool that compiles CSS from a different format, providing features like variables and nesting</label><br>
+                <label><input type="radio" name="q10" value="B"> B) A method to minify CSS for production</label><br>
+                <label><input type="radio" name="q10" value="C"> C) A way to inline CSS within HTML</label><br>
+                <label><input type="radio" name="q10" value="D"> D) A framework that helps in writing CSS</label><br>
+            </div>
+            <div class="question">
+                <p>11. Which of the following is a key feature of Progressive Web Apps (PWAs)?</p>
+                <label><input type="radio" name="q11" value="A"> A) PWAs must be installed from an app store</label><br>
+                <label><input type="radio" name="q11" value="B"> B) PWAs can work offline and provide a native app-like experience</label><br>
+                <label><input type="radio" name="q11" value="C"> C) PWAs require a specific framework to be built</label><br>
+                <label><input type="radio" name="q11" value="D"> D) PWAs cannot be added to the home screen</label><br>
+            </div>
+            <div class="question">
+                <p>12. In which scenario would you use the service worker API?</p>
+                <label><input type="radio" name="q12" value="A"> A) To manage API requests</label><br>
+                <label><input type="radio" name="q12" value="B"> B) To create a responsive design</label><br>
+                <label><input type="radio" name="q12" value="C"> C) To cache resources and enable offline functionality</label><br>
+                <label><input type="radio" name="q12" value="D"> D) To handle form submissions</label><br>
+            </div>
+            <div class="question">
+                <p>13. What is the primary benefit of using CSS variables (custom properties)?</p>
+                <label><input type="radio" name="q13" value="A"> A) They are faster to compute</label><br>
+                <label><input type="radio" name="q13" value="B"> B) They allow for dynamic changes to the styles across a document</label><br>
+                <label><input type="radio" name="q13" value="C"> C) They reduce the file size of CSS</label><br>
+                <label><input type="radio" name="q13" value="D"> D) They are automatically prefixed for compatibility</label><br>
+            </div>
+            <div class="question">
+                <p>14. In the context of web accessibility, what does WCAG stand for?</p>
+                <label><input type="radio" name="q14" value="A"> A) Web Content Accessibility Guidelines</label><br>
+                <label><input type="radio" name="q14" value="B"> B) Web Communication Accessibility Guidelines</label><br>
+                <label><input type="radio" name="q14" value="C"> C) Web Consortium Accessibility Guidelines</label><br>
+                <label><input type="radio" name="q14" value="D"> D) Web Compliance Accessibility Guidelines</label><br>
+            </div>
+            <div class="question">
+                <p>15. What is the purpose of the content-security-policy HTTP header?</p>
+                <label><input type="radio" name="q15" value="A"> A) To control how resources are loaded on a web page</label><br>
+                <label><input type="radio" name="q15" value="B"> B) To specify the allowed origins for cross-origin requests</label><br>
+                <label><input type="radio" name="q15" value="C"> C) To enforce HTTPS connections</label><br>
+                <label><input type="radio" name="q15" value="D"> D) To provide a fallback for unsupported browsers</label><br>
+            </div>
+            <div class="question">
+                <p>16. What is the purpose of the keyframes rule in CSS?</p>
+                <label><input type="radio" name="q16" value="A"> A) To define the style for an animation at various stages</label><br>
+                <label><input type="radio" name="q16" value="B"> B) To create transitions between different states</label><br>
+                <label><input type="radio" name="q16" value="C"> C) To specify the duration of an animation</label><br>
+                <label><input type="radio" name="q16" value="D"> D) To define the timing function of an animation</label><br>
+            </div>
+            <div class="question">
+                <p>17. Which of the following attributes is required when using the &lt;iframe&gt; tag for accessibility?</p>
+                <label><input type="radio" name="q17" value="A"> A) src</label><br>
+                <label><input type="radio" name="q17" value="B"> B) title</label><br>
+                <label><input type="radio" name="q17" value="C"> C) width</label><br>
+                <label><input type="radio" name="q17" value="D"> D) height</label><br>
+            </div>
+            <div class="question">
+                <p>18. What does the term "CORS" stand for, and what is its purpose?</p>
+                <label><input type="radio" name="q18" value="A"> A) Cross-Origin Resource Sharing; it allows or restricts resources from being requested from another domain</label><br>
+                <label><input type="radio" name="q18" value="B"> B) Cross-Origin Request Security; it secures requests made across different origins</label><br>
+                <label><input type="radio" name="q18" value="C"> C) Cross-Origin Resource Security; it protects resources from being shared</label><br>
+                <label><input type="radio" name="q18" value="D"> D) Cross-Origin Resource System; it manages resources across different origins</label><br>
+            </div>
+            <div class="question">
+                <p>19. In a web application, what is the significance of the DOMContentLoaded event in JavaScript?</p>
+                <label><input type="radio" name="q19" value="A"> A) It only triggers when all external resources are fully loaded</label><br>
+                <label><input type="radio" name="q19" value="B"> B) It signals that the initial HTML document has been completely loaded and parsed</label><br>
+                <label><input type="radio" name="q19" value="C"> C) It indicates that all stylesheets have been applied</label><br>
+                <label><input type="radio" name="q19" value="D"> D) It is fired when all images, scripts, and CSS are loaded</label><br>
+            </div>
+            <div class="question">
+                <p>20. What is the main difference between visibility: hidden; and display: none; in CSS?</p>
+                <label><input type="radio" name="q20" value="A"> A) visibility: hidden; keeps the element in the layout, while display: none; removes it</label><br>
+                <label><input type="radio" name="q20" value="B"> B) They are the same; both hide the element</label><br>
+                <label><input type="radio" name="q20" value="C"> C) display: none; allows for animations, while visibility: hidden; does not</label><br>
+                <label><input type="radio" name="q20" value="D"> D) visibility: hidden; makes the element invisible but still clickable</label><br>
+            </div>
+            <div class="question">
+                <p>21. Which CSS property is used to control the stacking order of overlapping elements?</p>
+                <label><input type="radio" name="q21" value="A"> A) z-index</label><br>
+                <label><input type="radio" name="q21" value="B"> B) order</label><br>
+                <label><input type="radio" name="q21" value="C"> C) position</label><br>
+                <label><input type="radio" name="q21" value="D"> D) stack-order</label><br>
+            </div>
+            <div class="question">
+                <p>22. Which of the following HTML elements is considered a block-level element?</p>
+                <label><input type="radio" name="q22" value="A"> A) &lt;span&gt;</label><br>
+                <label><input type="radio" name="q22" value="B"> B) &lt;div&gt;</label><br>
+                <label><input type="radio" name="q22" value="C"> C) &lt;link&gt;</label><br>
+                <label><input type="radio" name="q22" value="D"> D) &lt;img&gt;</label><br>
+            </div>
+            <div class="question">
+                <p>23. In CSS, which of the following selectors has the highest specificity?</p>
+                <label><input type="radio" name="q23" value="A"> A) .class</label><br>
+                <label><input type="radio" name="q23" value="B"> B) #id</label><br>
+                <label><input type="radio" name="q23" value="C"> C) div.class</label><br>
+                <label><input type="radio" name="q23" value="D"> D) div</label><br>
+            </div>
+            <div class="question">
+                <p>24. What will happen if you do not include a DOCTYPE declaration in an HTML document?</p>
+                <label><input type="radio" name="q24" value="A"> A) The browser will render the page in Quirks Mode</label><br>
+                <label><input type="radio" name="q24" value="B"> B) The page will not load at all</label><br>
+                <label><input type="radio" name="q24" value="C"> C) All CSS will be ignored</label><br>
+                <label><input type="radio" name="q24" value="D"> D) The document will automatically be treated as XHTML</label><br>
+            </div>
+            <div class="question">
+                <p>25. Which of the following JavaScript methods is used to convert a JSON string into a JavaScript object?</p>
+                <label><input type="radio" name="q25" value="A"> A) JSON.parse()</label><br>
+                <label><input type="radio" name="q25" value="B"> B) JSON.stringify()</label><br>
+                <label><input type="radio" name="q25" value="C"> C) JSON.objectify()</label><br>
+                <label><input type="radio" name="q25" value="D"> D) JSON.convert()</label><br>
+            </div>
+            <div class="question">
+                <p>26. What is the significance of using &lt;meta charset="UTF-8"&gt; in an HTML document?</p>
+                <label><input type="radio" name="q26" value="A"> A) It sets the document to use a specific CSS framework</label><br>
+                <label><input type="radio" name="q26" value="B"> B) It controls the rendering mode of the browser</label><br>
+                <label><input type="radio" name="q26" value="C"> C) It specifies the character encoding for the document</label><br>
+                <label><input type="radio" name="q26" value="D"> D) It enables responsive design</label><br>
+            </div>
+            <div class="question">
+                <p>27. What is the purpose of using the meta tag with name="description" in the HTML document?</p>
+                <label><input type="radio" name="q27" value="A"> A) To provide the title of the page</label><br>
+                <label><input type="radio" name="q27" value="B"> B) To give a brief summary of the page content for search engines</label><br>
+                <label><input type="radio" name="q27" value="C"> C) To specify the character encoding of the page</label><br>
+                <label><input type="radio" name="q27" value="D"> D) To link the page to external resources</label><br>
+            </div>
+            <div class="question">
+                <p>28. Which CSS media query feature is used to target devices based on their orientation (portrait vs landscape)?</p>
+                <label><input type="radio" name="q28" value="A"> A) device-width</label><br>
+                <label><input type="radio" name="q28" value="B"> B) min-width</label><br>
+                <label><input type="radio" name="q28" value="C"> C) orientation</label><br>
+                <label><input type="radio" name="q28" value="D"> D) aspect-ratio</label><br>
+            </div>
+            <div class="question">
+                <p>29. Which of the following is not a responsive design technique?</p>
+                <label><input type="radio" name="q29" value="A"> A) Media queries</label><br>
+                <label><input type="radio" name="q29" value="B"> B) Fluid grids</label><br>
+                <label><input type="radio" name="q29" value="C"> C) Fixed-width layouts</label><br>
+                <label><input type="radio" name="q29" value="D"> D) Flexible images</label><br>
+            </div>
+            <div class="question">
+                <p>30. Which HTTP status code is used to indicate that a resource has been permanently moved to a new URL?</p>
+                <label><input type="radio" name="q30" value="A"> A) 404</label><br>
+                <label><input type="radio" name="q30" value="B"> B) 301</label><br>
+                <label><input type="radio" name="q30" value="C"> C) 500</label><br>
+                <label><input type="radio" name="q30" value="D"> D) 302</label><br>
+            </div>
+            
+            <div class="quiz-buttons">
+                <button type="button" id="submit-btn" onclick="checkAnswers()">Submit Answers</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        const password = "comet24";
+        let teamName = "";
+        let timerInterval;
+    
+        function validateLogin() {
+            teamName = document.getElementById("team-name").value;
+            const enteredPassword = document.getElementById("password").value;
+    
+            if (enteredPassword === password) {
+                document.getElementById("login-form").style.display = "none";
+                document.getElementById("quiz-form").style.display = "block";
+                document.getElementById("quiz-form-1").style.display = "block";
+                startTimer(10);                                              //sets the timer in seconds
+            } else {
+                alert("Incorrect password. Please try again.");
+            }
+        }
+    
+        function checkAnswers() {
+            clearInterval(timerInterval); // Stop the timer
+            let score = 0;
+            const answers = [];
+            const questions = 30; // Total number of questions
+            for (let i = 1; i <= questions; i++) {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                if (selected) {
+                    const correctAnswers = {
+                        1: "B", 2: "D", 3: "D", 4: "D", 5: "B",
+                        6: "B", 7: "A", 8: "A", 9: "B", 10: "A",
+                        11: "B", 12: "C", 13: "B", 14: "A", 15: "A",
+                        16: "A", 17: "B", 18: "A", 19: "B", 20: "A",
+                        21: "A", 22: "B", 23: "B", 24: "A", 25: "A",
+                        26: "C", 27: "B", 28: "C", 29: "C", 30: "B"
+                    };
+                    const correct = selected.value === correctAnswers[i];
+                    if (correct) score++;
+                    answers.push({ question: i, answer: selected.value, correct });
+                }
+            }
+    
+            saveAnswersToFile(answers, score);
+            document.getElementById("submit-btn").disabled = true; // Disable the submit button
+            document.getElementById("timer").textContent = "Quiz submitted."; // Update timer to indicate submission
+        }
+    
+        function saveAnswersToFile(answers, score) {
+            let content = `Team Name: ${teamName}\n\n`;
+            content += `Quiz Results:\n\n`;
+            content += `Score: ${score} out of 30\n\n`;
+            answers.forEach((answer, index) => {
+                content += `Q${index + 1}: ${answer.question}\n`;
+                content += `Your Answer: ${answer.answer}\n`;
+                content += `Correct: ${answer.correct ? "Yes" : "No"}\n\n`;
+            });
+            const encryptedContent = CryptoJS.AES.encrypt(content, password).toString();
+            const blob = new Blob([encryptedContent], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${teamName}_quiz_results.txt`;
+            link.click();
+        }
+    
+        function startTimer(seconds) {
+            let timeRemaining = seconds;
+    
+            timerInterval = setInterval(() => {
+                const minutes = Math.floor(timeRemaining / 60);
+                const secondsLeft = timeRemaining % 60;
+                document.getElementById("timer").textContent = `Time remaining: ${minutes}:${secondsLeft < 10 ? '0' + secondsLeft : secondsLeft}`;
+                timeRemaining--;
+    
+                if (timeRemaining < 0) {
+                    clearInterval(timerInterval);
+                    alert("Time's up! Your answers have been submitting..!?");
+                    checkAnswers();
+                }
+            }, 1000);
+        }
+    
+        document.addEventListener("contextmenu", (e) => e.preventDefault());
+        document.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey && e.shiftKey && e.key === "I") || (e.ctrlKey && e.shiftKey && e.key === "i")) {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.key === "U") {
+                e.preventDefault();
+            }
+        });
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decrypt Encrypted File</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+            border-radius: 4px;
+            text-align: left;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 1em;
+        }
+        #result {
+            display: none;
+        }
+    </style>
+    <script>
+        function handleFile() {
+            const file = document.getElementById("fileInput").files[0];
+            const userPassword = document.getElementById("passwordInput").value;
+
+            if (!file) {
+                alert("Please select a file.");
+                return;
+            }
+
+            if (!userPassword) {
+                alert("Please enter the password.");
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const encryptedText = e.target.result;
+
+                try {
+                    // Decrypt the content
+                    const decryptedBytes = CryptoJS.AES.decrypt(encryptedText, userPassword);
+                    const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+
+                    if (!decryptedText) {
+                        alert("Invalid password or file content.");
+                        return;
+                    }
+
+                    // Display the decrypted content
+                    const resultBox = document.getElementById("result");
+                    resultBox.textContent = decryptedText;
+                    resultBox.style.display = "block";
+                } catch (err) {
+                    alert("Error decrypting file. Please check the file and password.");
+                }
+            };
+
+            reader.readAsText(file);
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Decrypt Encrypted File</h1>
+        <p>Select your encrypted file and enter the password to decrypt:</p>
+        <input type="file" id="fileInput" accept=".txt">
+        <br>
+        <input type="password" id="passwordInput" placeholder="Enter decryption password">
+        <br>
+        <button onclick="handleFile()">Decrypt File</button>
+        <div id="result" class="result-box"></div>
+    </div>
+</body>
+</html>
